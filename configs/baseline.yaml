@@ -1,0 +1,45 @@
+# Environment
+env:
+  device: "cuda"
+  seed: 42
+
+# Clearml
+clearml:
+  use_clearml: False
+  name_task: "debug1"
+  tags: ["debug"]
+
+# Training/Test
+loops_settings:
+  epochs: 100
+  batch_size: 8
+  clip: False
+  mix_precision: False
+  show_images: False
+
+# Dataset
+dataset:
+  test_size: 0.2
+
+# Model
+model: "AttentionGatedUnet"
+model_settings:
+  input_channels: 3
+  output__channels: 1
+
+# Optimizer
+optimizer: "Adam"
+optimizer_settings:
+  lr: 0.001
+  weight_decay: 0.1
+  betas: [0.9, 0.999]
+  eps: 0.00000001
+  amsgrad: False
+
+# Loss
+loss: "FocalLoss"
+loss_settings:
+  gamma: 0
+  size_average: null
+  reduce: null
+  balance_param: 1.0

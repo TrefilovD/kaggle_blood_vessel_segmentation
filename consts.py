@@ -1,0 +1,1 @@
+BASE_DIR = r"C:\Users\User\Desktop\work\datasets\blood-vessel-segmentation"
