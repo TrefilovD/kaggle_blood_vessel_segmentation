@@ -14,6 +14,10 @@ from model import get_model
 from init_optimizer import get_optimizer
 
 
+import warnings
+warnings.filterwarnings("ignore")
+
+
 def parse_config_path():
     parser = ArgumentParser()
     parser.add_argument(
@@ -63,8 +67,15 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(train_dataset, batch_size=cfg.loops_settings.batch_size, shuffle=True)
     val_dataloader = DataLoader(val_dataset, batch_size=cfg.loops_settings.batch_size, shuffle=False)
 
+    dataloader = {
+        "train": train_dataset,
+        "test": val_dataloader
+    }
+
     model = get_model(cfg.model, cfg.model_settings, task)
     optimizer = get_optimizer(cfg.optimizer, cfg.optimizer_settings, model.parameters(), task)
     criterion = get_loss(cfg.loss, cfg.loss_settings, task)
+
+    device = cfg.env.device
     
-    train_and_test()
+    train_and_test(model, dataloader, optimizer, criterion, device)

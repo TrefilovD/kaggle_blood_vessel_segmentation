@@ -27,6 +27,17 @@ def train_and_test(
         task: Optional[Task] = None,
         logger: Optional[Logger] = None
     ):
+    # from tqdm.auto import trange
+    # from time import sleep
+    # pbar_i = trange(2, desc='loop-1')
+    # pbar_j = trange(3, desc='loop-2', leave=False)
+    # pbar_k = trange(4, desc='loop-3', leave=False)
+
+    # for i in pbar_i:
+    #     for j in pbar_j:
+    #         for k in pbar_k:
+    #             sleep(0.2)
+    # return
     since = time.time()
     best_loss = 1e10
     
@@ -37,22 +48,22 @@ def train_and_test(
     train_epoch_losses = []
     test_epoch_losses = []
 
-    pbar = trange(range(1, num_epochs + 1), desc="Training...")
-    for epoch in pbar(range(1, num_epochs + 1)):
-        pbar.set_description(f'Epoch {epoch}/{num_epochs}')
+    pbar_epoch = trange(num_epochs, desc=f"Train on {num_epochs}")
+    for epoch in pbar_epoch:
+        # pbar.set_description(f'Epoch {epoch}/{num_epochs}')
         
         batchsummary = {a: [0] for a in fieldnames}
         batch_train_loss = 0.0
         batch_test_loss = 0.0
 
-        for phase in ['training', 'test']:
-            if phase == 'training':
+        for phase in ['train', 'test']:
+            if phase == 'train':
                 model.train()
             else:
                 model.eval()
 
-            for sample in iter(dataloaders[phase]):
-
+            # pbar_batch = tqdm(enumerate(dataloaders[phase]), desc=f'Epoch {epoch}/{num_epochs}', leave=False)
+            for idx_sample, sample in enumerate(dataloaders[phase]):
                 inputs = sample[0].to(device)
                 masks = sample[1].to(device)
                 if show_images:
@@ -81,24 +92,24 @@ def train_and_test(
                     else:
                         batch_test_loss += loss.item() * sample[0].size(0)
 
-            if phase == 'training':
-                epoch_train_loss = batch_train_loss / len(dataloaders['training'])
+            if phase == 'train':
+                epoch_train_loss = batch_train_loss / len(dataloaders['train'])
                 train_epoch_losses.append(epoch_train_loss)
             else:
                 epoch_test_loss = batch_test_loss / len(dataloaders['test'])
                 test_epoch_losses.append(epoch_test_loss)
 
             batchsummary['epoch'] = epoch
-            
+            loss = 0 # TODO delete
             info = '{} Loss: {:.4f}'.format(phase, loss)
-            pbar.write(info)
+            # pbar.write(info)
 
         best_loss = np.max(batchsummary['test_dice_coeff'])
         for field in fieldnames[3:]:
             batchsummary[field] = np.mean(batchsummary[field])
         info = \
             f'\t\t\t train_dice_coeff: {batchsummary["training_dice_coeff"]}, test_dice_coeff: {batchsummary["test_dice_coeff"]}'
-        pbar.write(info)
+        # pbar.write(info)
 
     info = 'Best dice coefficient: {:4f}'.format(best_loss)
     print(info)
